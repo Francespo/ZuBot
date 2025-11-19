@@ -81,26 +81,35 @@ def next_iteration(sct):
         print("waiting for connection to end")
     elif detection["bb_home.png"]:
         if detection["bb_home_ multiplayer_button.png"]:
+            print("I am in the bb home, the multiplayer button is highlighted")
             send_input("enter")
             time.sleep(random.uniform(1, 1.5))
         else:
+            print("I am in the bb home, the multiplayer button is not highlighted")
             send_input("down")
     elif detection["bb_lobbys_search_button.png"]:
+        print("I am in the bb lobby screen, the search panel is being shown")
         send_input("e")
     elif detection["bb_lobbys.png"]:
         if detection["bb_lobbys_quickmatch_button.png"]:
+            print("I am in the bb home, the quick search button is highlighted")
             send_input("enter")
             time.sleep(random.uniform(2.5, 3.5))
         else:
+            print("I am in the bb home, the quick search button is not highlighted")
             send_input("down")
     elif detection["bb_teamselect.png"]:
+        print("I am in the team selection screen")
         send_input("enter")
     elif detection["match_next_button.png"]:
+        print("I am in-game")
         send_input("enter")
         time.sleep(random.uniform(2.5, 3.5))
     elif detection["match_formationset_button.png"]:
+        print("I am in-game, waiting for formations to be set")
         send_input("alt")
     elif detection["banner_interaction_mark.png"]:
+        print("I am facing a banner")
         send_input("enter")
 
 
