@@ -57,7 +57,7 @@ def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bo
     """
     # cv.imshow("im", image)
     # cv.waitKey(2000)
-    temp_path = os.path.join("PrivateConfig", "Templates")
+    temp_path = os.path.join("ZuBotPrivateConfig", "Templates")
     templates = os.listdir(temp_path)
     def evaluate_template(template_name : str) -> bool:
         template = cv.imread(os.path.join(temp_path, template_name))

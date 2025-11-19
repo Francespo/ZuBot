@@ -1,0 +1,3 @@
+[submodule "ZuBotPrivateConfig"]
+	path = ZuBotPrivateConfig
+	url = https://github.com/Francespo/ZuBotPrivateConfig.git
