@@ -5,6 +5,7 @@ import numpy as np
 import os
 import time
 from input_handling import send_input
+import concurrent.futures
 
 def take_screenshot(sct) -> np.ndarray:
     """Takes a screenshot of the second monitor."""
@@ -53,13 +54,22 @@ def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bo
         A dictionary where keys are template names and values are booleans
         indicating if the template was found.
     """
-    def evaluate_template(template_name : str) -> bool:
+    def evaluate_template(template_name: str) -> tuple[str, bool]:
+        """Evaluates a single template and returns its name and whether it was found."""
         template = templates[template_name]
         result = cv.matchTemplate(image, template, cv.TM_CCOEFF_NORMED)
         _, max_val, _, _ = cv.minMaxLoc(result)
-        return max_val >= tolerance
+        return template_name, max_val >= tolerance
 
-    return {temp: evaluate_template(temp) for temp in templates}
+    detection_dict = {}
+    # Use a thread pool to run template matching concurrently
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Map the evaluate_template function to all template names
+        results = executor.map(evaluate_template, templates.keys())
+        # Collect the results into the dictionary
+        for template_name, is_detected in results:
+            detection_dict[template_name] = is_detected
+    return detection_dict
 def next_iteration(sct):
     """Takes a screenshot and performs the next action based on screen content."""
     img = take_screenshot(sct)
