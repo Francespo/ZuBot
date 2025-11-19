@@ -5,11 +5,12 @@ import numpy as np
 import os
 import time
 from input_handling import send_input
+import config as cfg
 import concurrent.futures
 
 def take_screenshot(sct) -> np.ndarray:
     """Takes a screenshot of the second monitor."""
-    monitor = sct.monitors[2]
+    monitor = sct.monitors[cfg.MONITOR_NUMBER]
     screenshot = sct.grab(monitor)
     return cv.cvtColor(np.array(screenshot), cv.COLOR_BGRA2BGR)
 def are_images_different(image1: np.ndarray, image2: np.ndarray, pixel_threshold: int = 30, percentage_threshold: float = 0.01) -> bool:
@@ -106,11 +107,10 @@ def next_iteration(sct):
 
 print("Starting bot in 5 seconds...")
 time.sleep(5)
-temp_path = os.path.join("ZuBotPrivateConfig", "Templates")
-template_names = os.listdir(temp_path)
+template_names = os.listdir(cfg.TEMPLATES_FOLDER_PATH)
 templates = {}
 for template_name in template_names:
-    templates[template_name] = cv.imread(os.path.join(temp_path, template_name))
+    templates[template_name] = cv.imread(os.path.join(cfg.TEMPLATES_FOLDER_PATH, template_name))
 try:
     with mss.mss() as sct:
         i = 0
