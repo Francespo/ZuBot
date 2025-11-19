@@ -45,8 +45,6 @@ def are_images_different(image1: np.ndarray, image2: np.ndarray, pixel_threshold
     return diff_percentage > percentage_threshold
 def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bool]:
     """
-    Detects templates in the image and returns a dictionary of detection results.
-
     Args:
         image: The image to search in.
         tolerance: The matching tolerance for template matching.
@@ -55,21 +53,18 @@ def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bo
         A dictionary where keys are template names and values are booleans
         indicating if the template was found.
     """
-    # cv.imshow("im", image)
-    # cv.waitKey(2000)
-    temp_path = os.path.join("ZuBotPrivateConfig", "Templates")
-    templates = os.listdir(temp_path)
     def evaluate_template(template_name : str) -> bool:
-        template = cv.imread(os.path.join(temp_path, template_name))
+        template = templates[template_name]
         result = cv.matchTemplate(image, template, cv.TM_CCOEFF_NORMED)
         _, max_val, _, _ = cv.minMaxLoc(result)
-        return max_val > tolerance
+        return max_val >= tolerance
 
     return {temp: evaluate_template(temp) for temp in templates}
 def next_iteration(sct):
     """Takes a screenshot and performs the next action based on screen content."""
     img = take_screenshot(sct)
     detection = generate_detection_dict(img, 0.90)
+    del img
 
     if detection["bb_home_transmitting.png"] or detection["bb_lobbys_searchingforopponent.png"]:
         print("waiting for connection to end")
@@ -79,8 +74,6 @@ def next_iteration(sct):
             time.sleep(random.uniform(1, 1.5))
         else:
             send_input("down")
-    elif detection["bb_home_failed.png"] and not detection["bb_lobbys.png"]:
-        send_input("enter")
     elif detection["bb_lobbys_search_button.png"]:
         send_input("e")
     elif detection["bb_lobbys.png"]:
@@ -96,24 +89,25 @@ def next_iteration(sct):
         time.sleep(random.uniform(2.5, 3.5))
     elif detection["match_formationset_button.png"]:
         send_input("alt")
-    elif detection["match_player_disconnecting.png"]:
+    elif detection["banner_interaction_mark.png"]:
         send_input("enter")
 
-def main():
-    """Main loop for the bot."""
-    print("Starting bot in 5 seconds...")
-    time.sleep(5)
-    try:
-        with mss.mss() as sct:
-            i = 0
-            while True:
-                print(f"Starting iteration number: {i}")
-                next_iteration(sct)
-                i += 1
-                time.sleep(random.uniform(0.4, 0.8))
-    except KeyboardInterrupt:
-        print("\nBot stopped by user.")
 
 
-if __name__ == "__main__":
-    main()
+print("Starting bot in 5 seconds...")
+time.sleep(5)
+temp_path = os.path.join("ZuBotPrivateConfig", "Templates")
+template_names = os.listdir(temp_path)
+templates = {}
+for template_name in template_names:
+    templates[template_name] = cv.imread(os.path.join(temp_path, template_name))
+try:
+    with mss.mss() as sct:
+        i = 0
+        while True:
+            print(f"Starting iteration number: {i}")
+            next_iteration(sct)
+            i += 1
+            time.sleep(random.uniform(0.4, 0.8))
+except KeyboardInterrupt:
+    print("\nBot stopped by user.")

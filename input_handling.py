@@ -7,7 +7,7 @@ import win32gui
 import os
 import json
 
-filename = os.path.join("PrivateConfig", "Config.JSON")
+filename = os.path.join("ZuBotPrivateConfig", "Config.JSON")
 with open(filename) as f:
     config = json.load(f)
 WINDOW_TITLE = config["WINDOW_TITLE"]
