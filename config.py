@@ -1,7 +1,7 @@
 import json
 import os
 
-filename = os.path.join("ZuBotPrivateConfig", "DESKTOP", "Config.JSON")
+filename = os.path.join("ZuBotPrivateConfig", "VM", "Config.JSON")
 with open(filename) as f:
     config = json.load(f)
 WINDOW_TITLE = config["WINDOW_TITLE"]
