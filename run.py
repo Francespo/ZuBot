@@ -10,7 +10,7 @@ import concurrent.futures
 
 def take_screenshot(sct) -> np.ndarray:
     """Takes a screenshot of the second monitor."""
-    monitor = sct.monitors[cfg.MONITOR_NUMBER]
+    monitor = sct.monitors[int(cfg.MONITOR_NUMBER)]
     screenshot = sct.grab(monitor)
     return cv.cvtColor(np.array(screenshot), cv.COLOR_BGRA2BGR)
 def are_images_different(image1: np.ndarray, image2: np.ndarray, pixel_threshold: int = 30, percentage_threshold: float = 0.01) -> bool:
@@ -83,7 +83,7 @@ def next_iteration(sct):
         if detection["bb_home_ multiplayer_button.png"]:
             print("I am in the bb home, the multiplayer button is highlighted")
             send_input("enter")
-            time.sleep(random.uniform(1, 1.5))
+            time.sleep(random.uniform(5, 6))
         else:
             print("I am in the bb home, the multiplayer button is not highlighted")
             send_input("down")
@@ -94,7 +94,7 @@ def next_iteration(sct):
         if detection["bb_lobbys_quickmatch_button.png"]:
             print("I am in the bb home, the quick search button is highlighted")
             send_input("enter")
-            time.sleep(random.uniform(2.5, 3.5))
+            time.sleep(random.uniform(5, 6))
         else:
             print("I am in the bb home, the quick search button is not highlighted")
             send_input("down")
@@ -104,7 +104,7 @@ def next_iteration(sct):
     elif detection["match_next_button.png"]:
         print("I am in-game")
         send_input("enter")
-        time.sleep(random.uniform(2.5, 3.5))
+        time.sleep(random.uniform(4, 5))
     elif detection["match_formationset_button.png"]:
         print("I am in-game, waiting for formations to be set")
         send_input("alt")
