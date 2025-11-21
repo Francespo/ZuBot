@@ -9,7 +9,7 @@ import config as cfg
 
 def take_screenshot(sct) -> np.ndarray:
     """Takes a screenshot of the second monitor."""
-    monitor = sct.monitors[int(cfg.MONITOR_NUMBER)]
+    monitor = sct.monitors[cfg.MONITOR_NUMBER]
     screenshot = sct.grab(monitor)
     return cv.cvtColor(np.array(screenshot), cv.COLOR_BGRA2BGR)
 def are_images_different(image1: np.ndarray, image2: np.ndarray, pixel_threshold: int = 30, percentage_threshold: float = 0.01) -> bool:
