@@ -12,7 +12,7 @@ def quit_game() -> None:
         attempt += 1
         if attempt > 5:
             _force_quit()
-    time.sleep(8)
+    time.sleep(15)
 
 def _safe_quit() -> None:
     gentle_close_command = f"""
