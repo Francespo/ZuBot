@@ -1,13 +1,12 @@
+from input_handler import send_input
+import config as cfg
+import process_handler as game_process
 import random
 import cv2 as cv
 import mss
 import numpy as np
-import os
 import time
-from input_handling import send_input
 import concurrent.futures
-import config as cfg
-import psutil
 
 class StuckCounters:
     loading_screen_iterations = 0
@@ -32,7 +31,7 @@ def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bo
     """
     def evaluate_template(template_name: str) -> tuple[str, bool]:
         """Evaluates a single template and returns its name and whether it was found."""
-        template = templates[template_name]
+        template = cfg.TEMPLATES[template_name]
         result = cv.matchTemplate(image, template, cv.TM_CCOEFF_NORMED)
         _, max_val, _, _ = cv.minMaxLoc(result)
         return template_name, max_val >= tolerance
@@ -41,7 +40,7 @@ def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bo
     # Use a thread pool to run template matching concurrently, limiting workers
     # to match VM vCPUs for efficiency.
     with concurrent.futures.ThreadPoolExecutor(max_workers=cfg.MULTITHREADING_MAX_WORKERS) as executor: # Set max_workers here
-        results = executor.map(evaluate_template, templates.keys())
+        results = executor.map(evaluate_template, cfg.TEMPLATES.keys())
         for template_name, is_detected in results:
             detection_dict[template_name] = is_detected
     return detection_dict
@@ -86,6 +85,7 @@ def next_iteration(sct, stuck : StuckCounters):
         print("I am facing a banner")
         send_input("enter")
     elif detection["loading.png"]:
+        print("I am in the blue loading screen")
         stuck.loading_screen_iterations += 1
         if stuck.loading_screen_iterations >= 10:
             print("I got stuck loading")
@@ -98,10 +98,8 @@ def next_iteration(sct, stuck : StuckCounters):
         stuck.loading_screen_iterations = 0
 def restart_and_go_to_main_menu():
     print("I'm restarting the game")
-    while cfg.PROCESS_NAME in (p.name() for p in psutil.process_iter()):
-        os.system(f"taskkill /f /im {cfg.PROCESS_NAME}")
-        time.sleep(random.uniform(20, 25))
-    os.system(f"start {cfg.STEAM_URL}")
+    game_process.quit_game()
+    game_process.start_game()
     time.sleep(random.uniform(60, 65))
     send_input("enter")
     time.sleep(random.uniform(5, 6))
@@ -118,15 +116,15 @@ def go_to_bb_from_main_menu():
 print("Starting bot in 5 seconds...")
 time.sleep(5)
 stuck = StuckCounters()
-template_names = os.listdir(cfg.TEMPLATES_FOLDER_PATH)
-templates = {}
-for template_name in template_names:
-    templates[template_name] = cv.imread(os.path.join(cfg.TEMPLATES_FOLDER_PATH, template_name))
+if not game_process.is_game_running():
+    restart_and_go_to_main_menu()
+    go_to_bb_from_main_menu()
+    print("I should be ready to play now")
 try:
     with mss.mss() as sct:
         i = 0
         while True:
-            print(f"Starting iteration number: {i}")
+            print(f"{i} - ", end="")
             next_iteration(sct, stuck)
             i += 1
             time.sleep(random.uniform(0.4, 0.8))
