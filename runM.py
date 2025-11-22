@@ -7,44 +7,19 @@ import time
 from input_handling import send_input
 import concurrent.futures
 import config as cfg
+import psutil
+
+class StuckCounters:
+    loading_screen_iterations = 0
+    def __init__(self):
+        self.loading_screen_iterations = 0
+
 
 def take_screenshot(sct) -> np.ndarray:
     """Takes a screenshot of the second monitor."""
     monitor = sct.monitors[int(cfg.MONITOR_NUMBER)]
     screenshot = sct.grab(monitor)
     return cv.cvtColor(np.array(screenshot), cv.COLOR_BGRA2BGR)
-def are_images_different(image1: np.ndarray, image2: np.ndarray, pixel_threshold: int = 30, percentage_threshold: float = 0.01) -> bool:
-    """
-    Compares two images to see if they are significantly different, ignoring minor changes.
-
-    Args:
-        image1: The first image.
-        image2: The second image.
-        pixel_threshold: The threshold for pixel value differences (0-255).
-        percentage_threshold: The percentage of different pixels (0.0-1.0)
-                              to consider the images different.
-
-    Returns:
-        bool: True if the images are significantly different, False otherwise.
-    """
-    if image1.shape != image2.shape:
-        return True
-
-    # Calculate the absolute difference between the two images
-    diff = cv.absdiff(image1, image2)
-    gray_diff = cv.cvtColor(diff, cv.COLOR_BGR2GRAY)
-
-    # Create a binary image of the differences
-    _, thresh_diff = cv.threshold(gray_diff, pixel_threshold, 255, cv.THRESH_BINARY)
-
-    # Count the number of different pixels
-    diff_pixels = np.count_nonzero(thresh_diff)
-    total_pixels = image1.shape[0] * image1.shape[1]
-
-    # Calculate the percentage of different pixels
-    diff_percentage = diff_pixels / total_pixels
-
-    return diff_percentage > percentage_threshold
 def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bool]:
     """
     Args:
@@ -70,7 +45,7 @@ def generate_detection_dict(image: np.ndarray, tolerance: float) -> dict[str, bo
         for template_name, is_detected in results:
             detection_dict[template_name] = is_detected
     return detection_dict
-def next_iteration(sct):
+def next_iteration(sct, stuck : StuckCounters):
     """Takes a screenshot and performs the next action based on screen content."""
     img = take_screenshot(sct)
     detection = generate_detection_dict(img, 0.90)
@@ -110,11 +85,39 @@ def next_iteration(sct):
     elif detection["banner_interaction_mark.png"]:
         print("I am facing a banner")
         send_input("enter")
-
-
+    elif detection["loading.png"]:
+        stuck.loading_screen_iterations += 1
+        if stuck.loading_screen_iterations >= 10:
+            print("I got stuck loading")
+            restart_and_go_to_main_menu()
+            go_to_bb_from_main_menu()
+            print("I should be ready to play now")
+            stuck.loading_screen_iterations = 0
+        time.sleep(random.uniform(5, 6))
+    else:
+        stuck.loading_screen_iterations = 0
+def restart_and_go_to_main_menu():
+    print("I'm restarting the game")
+    while cfg.PROCESS_NAME in (p.name() for p in psutil.process_iter()):
+        os.system(f"taskkill /f /im {cfg.PROCESS_NAME}")
+        time.sleep(random.uniform(20, 25))
+    os.system(f"start {cfg.STEAM_URL}")
+    time.sleep(random.uniform(60, 65))
+    send_input("enter")
+    time.sleep(random.uniform(5, 6))
+    send_input("enter")
+    time.sleep(random.uniform(6, 8))
+    send_input("enter")
+def go_to_bb_from_main_menu():
+    print("I'm going in the bb")
+    for i in range(4):
+        send_input("right")
+        time.sleep(random.uniform(1, 2))
+    send_input("enter")
 
 print("Starting bot in 5 seconds...")
 time.sleep(5)
+stuck = StuckCounters()
 template_names = os.listdir(cfg.TEMPLATES_FOLDER_PATH)
 templates = {}
 for template_name in template_names:
@@ -124,7 +127,7 @@ try:
         i = 0
         while True:
             print(f"Starting iteration number: {i}")
-            next_iteration(sct)
+            next_iteration(sct, stuck)
             i += 1
             time.sleep(random.uniform(0.4, 0.8))
 except KeyboardInterrupt:
