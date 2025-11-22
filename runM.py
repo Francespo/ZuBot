@@ -94,13 +94,15 @@ def next_iteration(sct, stuck : StuckCounters):
             print("I should be ready to play now")
             stuck.loading_screen_iterations = 0
         time.sleep(random.uniform(5, 6))
+        return
     else:
-        stuck.loading_screen_iterations = 0
+        print("I don't know where I am")
+    stuck.loading_screen_iterations = 0
 def restart_and_go_to_main_menu():
     print("I'm restarting the game")
     game_process.quit_game()
     game_process.start_game()
-    time.sleep(random.uniform(60, 65))
+    time.sleep(random.uniform(65, 70))
     send_input("enter")
     time.sleep(random.uniform(5, 6))
     send_input("enter")
