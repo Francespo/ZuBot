@@ -75,7 +75,7 @@ def next_iteration(sct, stuck : StuckCounters):
         print("I am in the team selection screen")
         send_input("enter")
     elif detection["match_next_button.png"]:
-        print("I am in-game")
+        print("I am in-game, the match is either starting or it just ended")
         send_input("enter")
         time.sleep(random.uniform(4, 5))
     elif detection["match_formationset_button.png"]:
