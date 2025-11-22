@@ -35,7 +35,7 @@ EXTENDED_KEYS = {
     'pageup', 'pagedown'
 }
 
-def send_input(key):
+def send_input(key, debug = False):
     """
     Sends a low-level, scan-code based key press, correctly handling extended keys.
     The window MUST be brought to the foreground to receive the input.
@@ -81,6 +81,6 @@ def send_input(key):
     ii_.ki = KeyBdInput(0, scan_code, base_flags | win32con.KEYEVENTF_KEYUP, 0, ctypes.pointer(extra))
     release = Input(ctypes.c_ulong(1), ii_)
     ctypes.windll.user32.SendInput(1, ctypes.pointer(release), ctypes.sizeof(release))
-
-    print(f"Successfully sent scan code for key '{key}' to window '{WINDOW_TITLE}'.")
+    if debug:
+        print(f"Successfully sent scan code for key '{key}' to window '{WINDOW_TITLE}'.")
     return True
