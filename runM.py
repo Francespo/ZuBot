@@ -106,6 +106,7 @@ def restart_and_go_to_main_menu():
     send_input("enter")
     time.sleep(random.uniform(6, 8))
     send_input("enter")
+    time.sleep(random.uniform(8, 10))
 def go_to_bb_from_main_menu():
     print("I'm going in the bb")
     for i in range(4):
@@ -117,9 +118,12 @@ print("Starting bot in 5 seconds...")
 time.sleep(5)
 stuck = StuckCounters()
 if not game_process.is_game_running():
+    print("The game is not open")
     restart_and_go_to_main_menu()
     go_to_bb_from_main_menu()
     print("I should be ready to play now")
+else:
+    print("The game is already open")
 try:
     with mss.mss() as sct:
         i = 0
