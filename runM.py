@@ -13,7 +13,13 @@ class StuckCounters:
     def __init__(self):
         self.loading_screen_iterations = 0
 
-
+def periodically_check_for_crash(iteration : int, frequency : int):
+    if i % frequency == 0 and not game_process.is_game_running():
+        print("The game is not open")
+    restart_and_go_to_main_menu()
+    go_to_bb_from_main_menu()
+    print("I should be ready to play now")
+    
 def take_screenshot(sct) -> np.ndarray:
     """Takes a screenshot of the second monitor."""
     monitor = sct.monitors[int(cfg.MONITOR_NUMBER)]
@@ -119,18 +125,12 @@ def go_to_bb_from_main_menu():
 print("Starting bot in 5 seconds...")
 time.sleep(5)
 stuck = StuckCounters()
-if not game_process.is_game_running():
-    print("The game is not open")
-    restart_and_go_to_main_menu()
-    go_to_bb_from_main_menu()
-    print("I should be ready to play now")
-else:
-    print("The game is already open")
 try:
     with mss.mss() as sct:
         i = 0
         while True:
             print(f"{i} - ", end="")
+            periodically_check_for_crash(i, 25)
             next_iteration(sct, stuck)
             i += 1
             time.sleep(random.uniform(0.4, 0.8))
